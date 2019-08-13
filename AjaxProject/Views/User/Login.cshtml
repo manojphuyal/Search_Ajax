@@ -1,0 +1,92 @@
+﻿
+@{
+    ViewBag.Title = "Login";
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Samriddhi Memorial Admin Page</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script type="application/x-javascript"> addEventListener("load", function() { setTimeout(hideURLbar, 0); }, false); function hideURLbar(){ window.scrollTo(0,1); } </script>
+    <!-- Custom Theme files -->
+    <!-- //Custom Theme files -->
+    <!-- web font -->
+    <link href="~/Areas/Admin/assets/css/lib/login.css" rel="stylesheet" />
+    <link href="//fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i" rel="stylesheet">
+    <script src="~/Scripts/jquery-3.3.1.min.js"></script>
+    <!-- //web font -->
+</head>
+<body>
+    <!-- main -->
+    <div class="main-w3layouts wrapper">
+        <h1>Siddhi Memorial Foundation Admin Login</h1>
+        <div class="main-agileinfo">
+
+            <div class="agileits-top">
+
+                <form @*action="/User/Login" method="post"*@>
+                    <h2 style="color:#ffd800;"> Already have Account, Sign Up here! </h2>
+                    <input class="text" type="text" id="username" placeholder="Username" required="">
+                    <input class="text" type="password" id="password" placeholder="Password" required="">
+                    <button type="button" id="btnLogin" class="btn btn-primary">Sign In</button>
+                </form>
+                <p>Don't have Account? <a href="~/Login/Register">Signup Here!</a></p>
+
+            </div>
+        </div>
+
+
+
+
+        <!-- copyright -->
+        <div class="colorlibcopy-agile">
+            <p>© 2019  | Design by <a href="https://manojphuyal.com.np/" target="_blank">Manoj</a></p>
+        </div>
+        <!-- //copyright -->
+        <ul class="colorlib-bubbles">
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+        </ul>
+    </div>
+    <!-- //main -->
+    <script>
+        $(function () {
+            $("#btnLogin").click(function ()
+                    {
+                $.ajax({
+                    url: '/User/LoginUser',
+                    type: 'POST',
+                    data: {
+                        username: $('#username').val(),
+                        password: $('#password').val()
+                        },
+                    async: false,
+                    success: function (data) {
+                        if (data === 6) {
+                            window.location.href = "/User/Index";
+                        }
+                        else {
+                            alert("Invalid Username or Password");
+                               }
+                    },
+
+                    error: function () {
+                        alert('error in login');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
+

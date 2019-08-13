@@ -1,0 +1,783 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+}
+
+<link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+<script src="~/Scripts/jquery-3.3.1.min.js"></script>
+
+
+<div class="container" >
+    <div class="panel panel-primary">
+        <div class="panel-heading"> 
+            <h3>
+                Siddhi Memorial Foundation Admin Registration
+            </h3>
+            <div style="color: black">
+                <h3 style="color:white"> Search:</h3>
+                <input type="text" id="searchid" placeholder="Search Fullname" />
+            </div>
+        </div>
+
+        <div class="panel-body">
+            <form action="User/Login" method="post">
+
+                <div class="form-group">
+
+                    <input type="hidden" id="loginid" />
+                    Full Name:   <input type="text" id="fullname" placeholder="Enter Your Full Name">
+                    Email:   <input type="text" id="email" placeholder="Enter Your Email" />
+                    Username:  <input type="text" id="username" placeholder="Enter Username" required="">
+                </div><div class="form-group">
+    Password: <input type="password" id="password" placeholder="Password" required="">
+    Confirm-  Password: <input type="password" id="repassword" placeholder="Password" required="">
+    Post: <select id="role">
+
+    </select>
+    Country: <select id="countryid" onchange="StateList()">
+        
+    </select>
+    State: <select id="stateid">
+        
+    </select>
+</div>
+                <input type="button" value="Sign Up" id="creatbtn">
+                <input type="button" value="Edit" id="editbtn" />
+            </form>
+        </div>
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th><u>Login ID</u></th>
+                    <th><u>Full Name</u></th>
+                    <th><u>Email</u></th>
+                    <th><u>Username</u></th>
+                    <th><u>Password</u></th>
+                    <th><u>Role ID</u></th>
+                    <th><u>Role Name</u></th>
+                    <th><u>Country Name</u></th>
+                    <th><u>State Name</u></th>
+                    <th><u>Action</u></th>
+                </tr>
+            </thead>
+            <tbody id="useBody"></tbody>
+
+        </table>
+
+        <div class="modal fade" id="modal-edit" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header text-center">
+                        <h4 class="modal-title w-100 font-weight-bold">Change Password</h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body mx-3">
+                        <form>
+                            <input type="hidden" id="passid" />
+                            <div class="input-group">
+                                <label>Enter Password</label>
+                                <input class="input--style-3" type="text" placeholder="Password" name="password" id="pass" required="">
+                            </div>
+                            <div class="input-group">
+                                <label>Re-enter Password</label>
+                                <input class="input--style-3" type="text" placeholder="Confirm Password" id="repass" required="">
+                            </div>
+                            <div class="p-t-10">
+                                <button type="button" class="btn btn--pill btn--green" id="changepass">Change</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+        <div id="err">
+
+        </div>
+
+    </div>
+</div>
+<script>
+    $(function () {
+        $('#editbtn').hide();
+        //load user details
+        List();
+        getUserList();
+        CountryList();
+        //StateList();
+    });
+    //yesari haina??  state first ma yesari load nagarau
+   
+    function getUserList() {  
+        $.ajax({
+            url: '/User/getUserList',
+            type: 'get',
+            async: false,
+            success: function (data) {
+                var h = "";
+                $.each(data, function (i, item) {
+
+                    h += '<tr class="tblData' + item.Login_ID + '" data-id="' + item.Login_ID + '">';
+                    h += '<td>' + item.Login_ID + '</td>';
+                    h += '<td>' + item.Full_Name + '</td>';
+                    h += '<td>' + item.Email + '</td>';
+                    h += '<td>' + item.Username + '</td>';
+                    h += '<td>' + item.Password + '</td>';
+                    h += '<td>' + item.Role_ID + '</td>';
+                    h += '<td>' + item.Role_Name + '</td>';
+                    h += '<td>' + item.Country_Name + '</td>';
+                    h += '<td>' + item.State_Name + '</td>';
+                    h += '<td><button class="udelete" data-id="' + item.Login_ID + '" type="button" >DELETE</td>';
+                    h += '<td><button class="uedit" data-id="' + item.Login_ID + '" type="button">EDIT</td>';
+                    h += '</tr>';
+                });
+                debugger;
+                $("#useBody").html(h);
+            }
+        });
+    }
+
+
+
+
+
+    $(function () {
+        $("#creatbtn").click(function () {
+            debugger;
+            var vname = $('#fullname').val();
+            var vemail = $('#email').val();
+            var vusername = $('#username').val();
+            var vpassword = $('#password').val();
+            var vrepassword = $('#repassword').val();
+            var vrole = $('#role').val();
+            var vcountry = $('#countryid').val();
+            var vstate = $('#stateid').val();
+
+            // dai aaba k garne?? edit pani gareu ah dai bhoyo
+            var vdata = {
+                Full_Name: vname,     //Full_Name,Email,Username,Password,Repassword,Repassword,Role_ID from
+                Email: vemail,         //from database column for database connection or to submit data to database
+                Username: vusername,
+                Password: vpassword,
+                Repassword: vrepassword,
+                Role_ID: vrole,
+                Country_ID: vcountry,
+                State_ID: vstate
+            };
+
+            debugger;  //  dai ekxin ma herxu hai... dai maile join garya xaina,, tesaile huna sakxa hai...herata--ok bhannu ta
+
+            if (vname === "" || vname === null) {
+                $('#fullname').css("border", "2px solid red");
+            }
+
+            else if (vemail === null || vemail === "") {
+                $('#email').css("border", "2px solid red");
+
+            }
+            else if (vusername === "" || vusername === null) {
+                $('#username').css("border", "2px solid red");
+
+            }
+            else if (vpassword === "" || vpassword === null) {
+                $('#password').css("border", "2px solid red");
+
+            }
+            else if (vrepassword === "" || vrepassword === null) {
+                $('#repassword').css("border", "2px solid red");
+            }
+            else if (vrepassword != vpassword) {
+                alert("Password did not matched.");
+            }
+            else if (vrole === "" || vrole === null) {
+                alert("Please choose any Post");
+            }
+            else if (vcountry === "" || vcountry === null) {
+                alert("Please choose any Country");
+            }
+            else if (vstate === "" || vstate === null) {
+            alert("Please choose any State");
+
+            }
+
+            else {
+
+                $.ajax({
+                    url: '/User/Register',
+                    type: 'POST',
+                    data: vdata,
+                    dataType: "json",
+                    success: function (result) {
+                        if (result === 1) {
+                            getUserList();
+                            $('#fullname').val('');
+                            $('#email').val('');
+                            $('#username').val('');
+                            $('#password').val('');
+                            $('#repassword').val('');
+                            $('#role')[0].selectedIndex = 0;
+                            $('#countryid')[0].selectedIndex = 0;
+                            $('#stateid')[0].selectedIndex = 0;
+                        }
+                        else {
+                            alert("Username " + vdata.Username  +  " already Exists!!! Please choose different Username");
+                        }
+                    },
+                    error: function () {
+                        alert('Error Logging In');
+                    }
+                });
+
+            }
+        });
+
+        $("#fullname").on("keydown", function () {
+            if (event.keyCode == 13) {
+                if ($(this).val() == "" || $(this).val() == null) {
+                    $(this).focus();
+                }
+                else {
+                    $("#email").focus();
+                }
+            }
+
+        });
+        $("#email").on("keydown", function () {
+            if (event.keyCode == 13) {
+                if ($(this).val() == "" || $(this).val() == null) {
+                    $(this).focus();
+                }
+                else {
+                    $("#username").focus();
+                }
+            }
+
+        });
+        $("#username").on("keydown", function () {
+            if (event.keyCode == 13) {
+                if ($(this).val() == "" || $(this).val() == null) {
+                    $(this).focus();
+                }
+                else {
+                    $("#password").focus();
+                }
+            }
+
+        });
+        $("#password").on("keydown", function () {
+            if (event.keyCode == 13) {
+                if ($(this).val() == "" || $(this).val() == null) {
+                    $(this).focus();
+                }
+                else {
+                    $("#repassword").focus();
+                }
+            }
+
+        });
+        $("#repassword").on("keydown", function () {
+            if (event.keyCode == 13) {
+                if ($(this).val() == "" || $(this).val() == null) {
+                    $(this).focus();
+                }
+                else {
+                    $("#role").focus();
+                }
+            }
+
+        });
+       
+
+
+        $('#fullname').on("keyup", function () {
+
+            $(this).css("border", "2px solid black");
+        });
+
+        $('#email').on("keyup", function () {
+
+            $(this).css("border", "2px solid black");
+
+        });
+        $('#username').on("keyup", function () {
+
+            $(this).css("border", "2px solid black");
+
+        });
+        $('#password').on("keyup", function () {
+
+            $(this).css("border", "2px solid black");
+
+        });
+        $('#repassword').on("keyup", function () {
+
+            $(this).css("border", "2px solid black");
+
+        });
+
+
+    });
+
+
+    function List() {
+        $.ajax
+            ({
+                url: '/User/UserRoles',
+                type: 'get',
+                async: false,
+                success: function (data) {
+                    var h = '<option value="">Select Your Post</option>';
+                    $.each(data, function (i, item) {
+                        h += '<option value="' + item.Role_ID + '">' + item.Role_Name + '</option>'
+                    });
+                    $("#role").html(h);
+                }
+            });
+    }
+
+    $("#useBody").on("click", ".uedit", function () { //Show value to edit boxes
+        var loginid = $(this).attr("data-id");
+        $('#loginid').val(loginid);
+
+        $.ajax({
+            url: '/User/GetById',
+            type: 'GET',
+            dataType: 'JSON',
+            data: { id: loginid },
+            success: function (data) {
+                
+                    $('#fullname').val(data.Full_Name);
+                    $('#email').val(data.Email);
+                    $('#username').val(data.Username);
+                $('#role').val(data.Role_ID).change();
+                $('#countryid').val(data.Country_ID).change();
+                $('#stateid').val(data.State_ID).change();
+                    $('#loginid').val(loginid).change();
+                    $('#creatbtn').hide();
+                    $('#editbtn').show();
+
+                
+              
+            },
+                error: function () {
+                    alert("Server error!");
+                }
+            });
+    })
+
+
+
+
+    $(function () {
+        $("#editbtn").click(function () {
+            var vid = $('#loginid').val();
+            var vname = $('#fullname').val();
+            var vemail = $('#email').val();
+            var vusername = $('#username').val();
+            var vpassword = $('#password').val();
+            var vrepassword = $('#repassword').val();
+            var vrole = $('#role').val();
+            var vcountry = $('#countryid').val();
+            var vstate = $('#stateid').val();
+            //gara k vayo,,, dai yeta hernu hai ekchoti
+
+            var vdata = {
+                Login_ID: vid,
+                Full_Name: vname,     //Full_Name,Email,Username,Password,Repassword,Repassword,Role_ID from
+                Email: vemail,         //from database column for database connection or to submit data to database
+                Username: vusername,
+                Password: vpassword,
+                Repassword: vrepassword,
+                Role_ID: vrole,
+                Country_ID: vcountry,
+                State_ID: vstate
+            };
+
+            if (vname === "" || vname === null) {
+                $('#fullname').css("border", "2px solid red");
+            }
+
+            else if (vemail === null || vemail === "") {
+                $('#email').css("border", "2px solid red");
+
+            }
+            else if (vusername === "" || vusername === null) {
+                $('#username').css("border", "2px solid red");
+
+            }
+            else if (vpassword === "" || vpassword === null) {
+                $('#password').css("border", "2px solid red");
+
+            }
+            else if (vrepassword === "" || vrepassword === null) {
+                $('#repassword').css("border", "2px solid red");
+            }
+            else if (vrepassword != vpassword) {
+                alert("Password did not matched.");
+            }
+            else if (vrole === "" || vrole === null) {
+                alert("Please choose any Post");
+            }
+            else if (vcountry === "" || vcountry === null) {
+                alert("Please choose any Country");
+            }
+            else if (vstate === "" || vstate === null) {
+                alert("Please choose any State");
+
+            }
+
+            else {
+
+                $.ajax({
+                   
+                    url: '/User/Edit',
+                    type: 'POST',
+                    data: vdata,
+                    dataType: "json",
+                    success: function (result) {
+                        if (result === 1) {
+                            getUserList();
+                            $(".tblData" + vid).css({
+                                background: "green",
+                                color:"white"
+                            });
+                            
+                    
+
+                            
+                            $('#fullname').val('');
+                            $('#email').val('');
+                            $('#username').val('');
+                            $('#password').val('');
+                            $('#repassword').val('');
+                            $('#role')[0].selectedIndex = 0;
+                            $('#countryid')[0].selectedIndex = 0;
+                            $('#stateid')[0].selectedIndex = 0;
+                            $('#creatbtn').show();
+                            $('#editbtn').hide();
+                        }
+                        else {
+                          // alert("Username  already Exists!!! Please choose different Username");
+
+                            $("#err").html('<h3 style="color:red;">User '+ vdata.Username +' already exist</h3>').fadeIn("slow").fadeOut("slow");
+                        }
+                    },
+                    error: function () {
+                        alert('Error Logging In');
+                    }
+                });
+
+            }
+        });
+
+
+        $('#fullname').on("keyup", function () {
+
+            $(this).css("border", "2px solid black");
+        });
+
+        $('#email').on("keyup", function () {
+
+            $(this).css("border", "2px solid black");
+
+        });
+        $('#username').on("keyup", function () {
+
+            $(this).css("border", "2px solid black");
+
+        });
+        $('#password').on("keyup", function () {
+
+            $(this).css("border", "2px solid black");
+
+        });
+        $('#repassword').on("keyup", function () {
+
+            $(this).css("border", "2px solid black");
+
+        });
+
+
+    });
+
+
+
+
+  
+
+
+
+    $("#useBody").on("click", ".udelete", function () {
+        var id = $(this).attr("data-id");
+        $.ajax({
+            type: "get",
+            url: "/User/Delete",
+            data: { uid: id },
+            dataType: "json",
+            success: function (result) {
+                if (result === 1) {   
+                    getUserList();
+                    
+                }
+                else {
+                    alert("NO Data Deleted!!!");
+                }
+            },
+            error: function () {
+                alert('Error Delete server');
+            }
+        });
+    });
+
+    $("#searchid").on("keyup", function () {
+        var search1 = $(this).val();
+        $.ajax({
+            url: "/User/Search",
+            type: "get",
+            dataType: "json",
+            data: { sear: search1 },
+            async:false,                    //here sera is the parameter of data in Search in controller
+            success: function (data) {
+                var h = "";
+                $.each(data, function (i, item) {
+
+                    h += '<tr class="tblData' + item.Login_ID + '" data-id="' + item.Login_ID + '">';
+                    h += '<td>' + item.Login_ID + '</td>';
+                    h += '<td>' + item.Full_Name + '</td>';
+                    h += '<td>' + item.Email + '</td>';
+                    h += '<td>' + item.Username + '</td>';
+                    h += '<td>' + item.Password + '</td>';
+                    h += '<td>' + item.Role_ID + '</td>';
+                    h += '<td>' + item.Role_Name + '</td>';
+                    h += '<td>' + item.Country_Name + '</td>';
+                    h += '<td>' + item.State_Name + '</td>';
+                    h += '<td><button class="udelete" data-id="' + item.Login_ID + '" type="button" >DELETE</td>';
+                    h += '<td><button class="uedit" data-id="' + item.Login_ID + '" type="button">EDIT</td>';
+                    h += '</tr>';
+                });
+                $("#useBody").html(h);
+            },
+            error: function () {
+                alert('Error Search ');
+            }
+        });
+
+        });
+
+
+
+
+     //Dropdown for Country
+    function CountryList() {
+        $.ajax
+            ({
+                url: '/User/DropCountry',
+                type: 'get',
+                async: false,
+                success: function (clist) {
+                    var h = '<option value="">Choose Your Country</option>';
+                    $.each(clist, function (i, item) {
+                        h += '<option value="' + item.Country_ID + '">' + item.Country_Name + '</option>'
+                    });
+                    $("#countryid").html(h);
+                }
+            });
+    }
+
+
+    //Dropdown for State
+    function StateList() { // function banaye pachi event lekhnu pardaina
+       // $("#countryid").on("change", function () {
+
+        var id = $("#countryid").val();
+            $.ajax
+                ({
+                    url: '/User/DropState',
+                    type: 'get',
+                    data: { id:id },
+                    success: function (slist) {
+                        var h = '<option value="">Select Your Post</option>';
+                        $.each(slist, function (i, item) {
+                            h += '<option value="' + item.State_ID + '">' + item.State_Name + '</option>'
+                        });
+                        $("#stateid").html(h);
+                    }
+                });
+
+        //});
+    }
+
+
+
+
+</script>
+
+
+@*<div class="container">
+    num1: <input type="text" onkeyup="if (/\D/g.test(this.value)) this.value = this.value.replace(/\D/g,'')" id="txt1" /><br>
+    num2: <input type="text" onkeyup="if (/\D/g.test(this.value)) this.value = this.value.replace(/\D/g,'')" id="txt2" /><br>
+
+    <button type="button" onclick="calculate('Add')" id="btnAdd" class="btn btn-danger">Add</button>
+    <button type="button" onclick="calculate('Sub')" id="btnSub" class="btn btn-danger">Subtract</button>
+    <button type="button" onclick="calculate('Mul')" id="btnMul" class="btn btn-danger">Multiply</button>
+    <button type="button" onclick="calculate('Div')" id="btnDiv" class="btn btn-danger">Division</button>
+    Resut: <input disabled="disabled" value="0" type="text" id="txtResult" /><br>
+</div>
+
+
+
+<script>
+
+    function Calculator(value) {
+        var text1 = $("#txt1").val();
+        var text2 = $("#txt2").val();
+        var result = 0;
+    }
+
+</script>*@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@*<script>
+    function calculate(type) {
+        var num1 = $("#txt1").val();
+        var num2 = $("#txt2").val();
+        var result = 0;
+        if (type == "Add") {
+            result = num1 + num2;
+        }
+        else if (type == "Sub") {
+            result = parseInt(num1) - parseInt(num2);
+        }
+        else if (type == "Mul") {
+            result = parseInt(num1) * parseInt(num2);
+        }
+        else if (type == "Div") {
+            result = parseInt(num1) / parseInt(num2);
+        }
+        $("#txtResult").val(result);
+    }
+</script>*@
+
+
+
+
+@*<script>
+
+
+    $("#btnExample").click(function () {
+        var name = $("#fullnameEx").val();
+        var eamil = $("#emailEx").val();
+        var username = $("#usernameEx").val();
+        var pass = $("#passwordEx").val();
+        var repass = $("#RepasswordEx").val();
+
+        if (name == "" || name == null) {
+
+            alert("Please Enter Your Name");
+        }
+        else if (eamil == "" || eamil == null) {
+            alert("Please Enter Your Email");
+        }
+        else if (username == "" || username == null) {
+            alert("Please Enter Your username");
+
+        }
+        else if (pass == "" || pass == null) {
+            alert("Please Enter Your Password");
+
+        }
+        else if (repass != pass) {
+            alert("Your Password Sholud match");
+
+        }
+        else {
+
+            $.ajax({
+                url: "/User/Register",
+                type: "POST",
+                dataType: 'JSON',
+                data: { Username: username, Email: eamil, Full_Name: name, Password: pass },
+                success: function (data) {
+                    $("#fullnameEx").val('');
+                    $("#emailEx").val('');
+                    $("#usernameEx").val('');
+                    $("#passwordEx").val('');
+
+                    var tr = '';
+
+                    $.each(data, function (key, val) {
+
+                        tr += '<tr><td>' + val.Full_Name + '</td><td>' + val.Email + '</td><td>' + val.Username + '</td><td><button>DELETE</button></td></tr>';
+                    });
+
+                    $("#showData").html(tr);
+                },
+                error: function (val) {
+                    alert("Server Error" + val);
+                }
+
+
+            });
+        }
+
+    });
+
+
+    $("#fullnameEx").keyup(function () {
+
+        if ($(this).val() == "" || $(this).val() == null) {
+            $(this).css("border", "2px solid red");
+
+        }
+        else {
+            $(this).css("border", "2px solid green");
+
+        }
+    });
+
+    $("#fullnameEx").keydown(function () {
+
+        if (event.keyCode == 13) {
+            if ($(this).val() == "" || $(this).val() == null) {
+                $(this).focus();
+            }
+            else {
+                $("#emailEx").focus();
+            }
+        }
+        
+    });
+
+
+
+
+
+
+</script>*@
